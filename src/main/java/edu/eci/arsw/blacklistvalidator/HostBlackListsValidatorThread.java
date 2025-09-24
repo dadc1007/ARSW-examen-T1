@@ -17,6 +17,10 @@ public class HostBlackListsValidatorThread extends Thread {
     this.blackListOcurrences = new LinkedList<>();
     this.ocurrencesCount = 0;
     this.checkedListsCount = 0;
+    this.skds = skds;
+    this.ipaddress = ipaddress;
+    this.start = start;
+    this.end = end;
   }
 
   @Override

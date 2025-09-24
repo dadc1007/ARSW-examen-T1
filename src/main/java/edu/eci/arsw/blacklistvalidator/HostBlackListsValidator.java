@@ -34,7 +34,7 @@ public class HostBlackListsValidator {
     HostBlacklistsDataSourceFacade skds = HostBlacklistsDataSourceFacade.getInstance();
 
     int fragment = skds.getRegisteredServersCount() / N;
-    int residue = sks.getRegisteredServersCount() % N;
+    int residue = skds.getRegisteredServersCount() % N;
     int start = 0;
     int end = 0;
 
