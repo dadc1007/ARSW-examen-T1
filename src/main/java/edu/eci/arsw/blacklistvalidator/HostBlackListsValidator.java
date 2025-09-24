@@ -32,6 +32,7 @@ public class HostBlackListsValidator {
   public List<Integer> checkHost(String ipaddress, int N) {
     List<HostBlackListsValidatorThread> threads = new ArrayList<>();
     HostBlacklistsDataSourceFacade skds = HostBlacklistsDataSourceFacade.getInstance();
+    Controller controller = new Controller();
 
     int fragment = skds.getRegisteredServersCount() / N;
     int residue = skds.getRegisteredServersCount() % N;
@@ -41,7 +42,7 @@ public class HostBlackListsValidator {
     for (int i = 0; i < N; i++) {
       end += (i == N - 1) ? fragment + residue : fragment;
       HostBlackListsValidatorThread thread =
-          new HostBlackListsValidatorThread(skds, ipaddress, start, end);
+          new HostBlackListsValidatorThread(skds, ipaddress, start, end, controller);
       thread.start();
       threads.add(thread);
 
@@ -56,17 +57,13 @@ public class HostBlackListsValidator {
       }
     }
 
-    int ocurrencesCount = 0;
-    int checkedListsCount = 0;
     LinkedList<Integer> blackListOcurrences = new LinkedList<>();
 
     for (HostBlackListsValidatorThread thread : threads) {
-      ocurrencesCount += thread.getOcurrencesCount();
-      checkedListsCount += thread.getCheckedListsCount();
       blackListOcurrences.addAll(thread.getBlackListOcurrences());
     }
 
-    if (ocurrencesCount >= BLACK_LIST_ALARM_COUNT) {
+    if (controller.getTotalOcurrencesCount() >= BLACK_LIST_ALARM_COUNT) {
       skds.reportAsNotTrustworthy(ipaddress);
     } else {
       skds.reportAsTrustworthy(ipaddress);
@@ -75,7 +72,7 @@ public class HostBlackListsValidator {
     LOG.log(
         Level.INFO,
         "Checked Black Lists:{0} of {1}",
-        new Object[] {checkedListsCount, skds.getRegisteredServersCount()});
+        new Object[] {controller.getTotalCheckedListsCount(), skds.getRegisteredServersCount()});
 
     return blackListOcurrences;
   }

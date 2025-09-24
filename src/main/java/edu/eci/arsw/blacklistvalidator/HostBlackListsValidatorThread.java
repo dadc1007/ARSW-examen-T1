@@ -11,9 +11,14 @@ public class HostBlackListsValidatorThread extends Thread {
   private String ipaddress;
   int start;
   int end;
+  Controller controller;
 
   public HostBlackListsValidatorThread(
-      HostBlacklistsDataSourceFacade skds, String ipaddress, int start, int end) {
+      HostBlacklistsDataSourceFacade skds,
+      String ipaddress,
+      int start,
+      int end,
+      Controller controller) {
     this.blackListOcurrences = new LinkedList<>();
     this.ocurrencesCount = 0;
     this.checkedListsCount = 0;
@@ -21,17 +26,22 @@ public class HostBlackListsValidatorThread extends Thread {
     this.ipaddress = ipaddress;
     this.start = start;
     this.end = end;
+    this.controller = controller;
   }
 
   @Override
   public void run() {
-    for (int i = start; i < end; i++) {
+    for (int i = start; i < end && !this.controller.isFinished(); i++) {
       checkedListsCount++;
+      this.controller.incrementTotalCheckedListsCount();
 
       if (skds.isInBlackListServer(i, ipaddress)) {
         blackListOcurrences.add(i);
         ocurrencesCount++;
+        this.controller.incrementTotalOcurrencesCount();
       }
+
+      this.controller.finish();
     }
   }
 
